@@ -19,7 +19,7 @@ S3 is a very flexible system: it allows you to do a lot of things that are quite
 We'll use the sloop package to fill in some missing pieces when it comes to S3. 
 
 ```{r, messages = FALSE}
-# install_github("hadley/sloop")
+# install_github("r-lib/sloop")
 library(sloop)
 ```
 
@@ -178,14 +178,6 @@ new_Date <- function(x) {
 new_Date(c(-1, 0, 1))
 ```
 
-You can use the `new_s3_*()` helpers provided by the sloop to make this even simpler. They are wrappers around structure that require a class argument, and check the base type of `x`.
-
-```{r}
-new_Date <- function(x) {
-  sloop::new_s3_dbl(x, class = "Date")
-}
-```
-
 The purpose of the constructor is to help the developer (you). That means you can keep them simple, and you don't need to optimise the error messages for user friendliness. If you expect others to create your objects, you should also create a friendly helper function, called `class_name()`, that we'll describe shortly.
 
 A slightly more complicated example is `POSIXct`, which is used to represent date-times. It is again built on a double, but has an attribute that specifies the time zone, a length 1 character vector. R defaults to using the local time zone, which is represented by the empty string. To create the constructor, we need to make sure each attribute of the class gets an argument to the constructor. This gives us:
@@ -266,7 +258,7 @@ validate_factor(new_factor(1:5, "a"))
 validate_factor(new_factor(0:1, "a"))
 ```
 
-This function is called primarily for its side-effects (throwing an error if the object is invalid) so you'd expect it to invisibly return its primary input. However, unlike most functions called for their side effects, its useful for validation methods to return visibly, as we'll see next.
+This function is called primarily for its side-effects (throwing an error if the object is invalid) so you'd expect it to invisibly return its primary input. However, unlike most functions called for their side effects, it's useful for validation methods to return visibly, as we'll see next.
 
 ### Helpers
 
@@ -405,6 +397,10 @@ A generic isn't useful without some methods, which are just functions that follo
 ```{r}
 generic.foo <- function(x, y, ...) {
   message("foo method")
+}
+
+new_s3_scalar <- function(..., class = character()) {
+  structure(list(...), class = class)
 }
 
 generic(new_s3_scalar(class = "foo"))
@@ -640,7 +636,7 @@ Then the implementation of the subclass constructor is simple: it checks the typ
 ```{r}
 new_subclass <- function(x, y, z) {
   stopifnot(is.character(z))
-  new_my_class(x, y, z, subclass = "subclass")
+  new_my_class(x, y, z = z, subclass = "subclass")
 }
 ```
 
@@ -650,7 +646,7 @@ If you wanted to allow this subclass to be futher subclassed, you'd need to incl
 new_subclass <- function(x, y, z, ..., subclass = NULL) {
   stopifnot(is.character(z))
   
-  new_my_class(x, y, z, ..., subclass = c(subclass, "subclass"))
+  new_my_class(x, y, z = z, ..., subclass = c(subclass, "subclass"))
 }
 ```
 
@@ -710,7 +706,7 @@ mutate.provenance <- function(.data, ...) {
 To do this for all the dplyr generics would require a lot of copying and pasting. Let's reduce some of that duplication by taking advantage of `sloop::reconstruct()`. `reconstruct()` is a generic function designed to reconstruct a subclass from an instance of the parent class, typically created by `NextMethod()`, and the original subclass. In other words, the job of a reconstructor is to take an object from a parent class, and copy over attributes from the subclass. (Note that `reconstruct()` is unusual in that it dispatches on the second argument. This allows a more natural specification.)
 
 ```{r}
-reconstruct.provenance  <- function(new, old) {
+reconstruct.provenance <- function(new, old) {
   new_provenance(
     new, 
     author = attr(old, "author"),
@@ -771,7 +767,7 @@ The precise rules for where a generic looks for the methods are a little complic
 
 These details are not usually important, but are necessary in order for S3 generics to find the correct method when the generic and method are in different packages.
 
-### S3 and base types
+### S3 and base types {#implicit-class}
 
 What happens when you call an S3 generic with a non-S3 object, i.e. an object that doesn't have the class attribute set? You might think it would dispatch on what `class()` returns:
 
@@ -811,7 +807,7 @@ s3_dispatch(mean(x2))
 
 ### Internal generics
 
-Some S3 generics, like `[`, `sum()`, and `cbind()`, don't call `UseMethod()` because they are implemented in C. Instead, they call the C functions `DispatchGroup()` or `DispatchOrEval()`. These functions are called __internal generics__, because they do dispatch internally, in C code. Internal generics only exist in base R, so you can not create an internal generic in a package.
+Some S3 generics, like `[`, `sum()`, and `cbind()`, don't call `UseMethod()` because they are implemented in C. Instead, they call the C functions `DispatchGroup()` or `DispatchOrEval()`. These functions are called __internal generics__, because they do dispatch internally, in C code. Internal generics only exist in base R, so you cannot create an internal generic in a package.
 
 `s3_dispatch()` shows internal generics by including the name of the generic at the bottom of the method class. If this method is called, all the work happens in C code, typically using [switchpatch].
 
@@ -832,7 +828,7 @@ s3_dispatch(mtcars[1])
 
 ### Group generics
 
-Group generics are the most complicated part of S3 method dispatch because they involve both `NextMethod()` and internal generics. Group generics are worth learning about, however, because they allow you to implement a whole swath of methods with one function. Like internal generics, they only exist in base R, and you can not define your own group generic.
+Group generics are the most complicated part of S3 method dispatch because they involve both `NextMethod()` and internal generics. Group generics are worth learning about, however, because they allow you to implement a whole swath of methods with one function. Like internal generics, they only exist in base R, and you cannot define your own group generic.
 
 Base R has four group generics, which are made up of the following generics: \index{group generics} \index{S3!group generics}
 
@@ -866,7 +862,7 @@ Math.difftime <- function(x, ...) {
 }
 ```
 
-It dispatches to the next method, here the internal default, to perform the actual computation, then copies back over the the class and attributes.
+It dispatches to the next method, here the internal default, to perform the actual computation, then copies back over the class and attributes.
 
 Note that inside a group generic function a special variable `.Generic` provides the actual generic function called. This can be useful when producing error messages, and can sometimes be useful if you need to manually re-call the generic with different arguments.
 
@@ -886,7 +882,7 @@ If `+` dispatched only on the first argument, it would return different values f
 
 * The methods are the same, so it doesn't matter which method is used.
 
-* The methods are different, and R calls the first method with a warning.
+* The methods are different, and R falls back to the internal method with a warning.
 
 * One method is internal, in which case R calls the other method.
 

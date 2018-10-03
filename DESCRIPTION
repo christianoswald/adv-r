@@ -10,6 +10,7 @@ Depends:
 Imports: 
     bookdown,
     dbplyr,
+    desc,
     emo,
     furrr,
     ggplot2,
@@ -27,6 +28,7 @@ Imports:
     rmarkdown,
     RSQLite,
     scales (>= 1.0.0),
+    sessioninfo,
     sloop,
     stringr,
     testthat,
@@ -34,6 +36,6 @@ Imports:
 Remotes: 
     hadley/emo,
     hadley/lineprof,
-    hadley/lobstr,
-    hadley/sloop,
+    r-lib/lobstr,
+    r-lib/sloop,
     r-lib/rlang
