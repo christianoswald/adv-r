@@ -68,7 +68,7 @@ Of course, R is not perfect. R's biggest challenge (and opportunity!) is that mo
   understand. Most users do not revise their code to address these shortcomings.
 
 * Compared to other programming languages, the R community is more focussed on 
-  results rather than processes. Knowledge of software engineering best 
+  results than processes. Knowledge of software engineering best 
   practices is patchy: for instance, not enough R programmers use source
   code control or automated testing.
 
@@ -171,6 +171,8 @@ Some good general advice:
   often figure out the root cause. I highly recommend learning and using
   the [reprex](https://reprex.tidyverse.org/) package.
 
+<!-- GVW: is someone going to go through once you're done and create a glossary? If you've flagged things like "reprex" in bold, it ought to be easy to find terms. -->
+
 ## Acknowledgments {#intro-ack}
 
 I would like to thank the many contributors to R-devel and R-help and, more recently, StackOverflow and RStudio Community. There are too many to name individually, but I'd particularly like to thank Luke Tierney, John Chambers, Dirk Eddelbuettel, JJ Allaire, and Brian Ripley for generously giving their time and correcting my countless misunderstandings.
@@ -236,7 +238,7 @@ Many examples use random numbers. These are made reproducible by `set.seed(1014)
 
 ## Colophon {#colophon}
 
-This book was written in [bookdown](http://bookdown.org/) inside [RStudio](http://www.rstudio.com/ide/). The [website](https://adv-r.hadley.nz/) is hosted with [netlify](http://netlify.com/), and automatically updated after every commit by [travis-ci](https://travis-ci.org/). The complete source is available from [github](https://github.com/hadley/adv-r). Code in the printed book is set in [inconsolata](http://levien.com/type/myfonts/inconsolata.html).
+This book was written in [bookdown](http://bookdown.org/) inside [RStudio](http://www.rstudio.com/ide/). The [website](https://adv-r.hadley.nz/) is hosted with [netlify](http://netlify.com/), and automatically updated after every commit by [travis-ci](https://travis-ci.org/). The complete source is available from [github](https://github.com/hadley/adv-r). Code in the printed book is set in [inconsolata](http://levien.com/type/myfonts/inconsolata.html). Emoji come from the open-licensed [Twitter Emoji](https://github.com/twitter/twemoji).
 
 This version of the book was built with the following version of R and packages.
 
