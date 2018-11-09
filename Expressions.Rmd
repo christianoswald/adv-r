@@ -220,6 +220,12 @@ expr(x)
 sym("x")
 ```
 
+You can turn a symbol back into a string with `as.character()` or `as_string()`. `as_string()` has the advantage of clearly signalling that you'll get a character vector of length 1.
+
+```{r}
+as_string(expr(x))
+```
+
 You can recognise a symbol because it's printed without quotes, and `str()` tells you that it's a symbol:
 
 ```{r}
@@ -227,7 +233,6 @@ str(expr(x))
 ```
 
 The symbol type is not vectorised, i.e. a symbol is always length 1. If you want multiple symbols, you'll need to put them in a list, using (e.g.) `rlang::syms()`.
-
 
 ### Calls
 \index{calls}
@@ -325,7 +330,7 @@ knitr::include_graphics("diagrams/expressions/call-call.png")
 ```
 
 
-#### Constructing
+#### Constructing {#call2}
 
 You can construct a call object from its components by using `rlang::call2()`. The first argument is the name of function to call (either as a string, a symbol, or another call). The remaining arguments will be passed along to the call:
 
@@ -483,7 +488,7 @@ as.list(parse(text = x1))
 ```
 :::
 
-The inverse of parsing is __deparsing__: given an expression, you want the string that would generate it. You can get this with `rlang::expr_text()`:
+The inverse of parsing is __deparsing__: given an expression, you want the string that would generate it. This happens automatically when you print an expression, and you can get the string yourself with `rlang::expr_text()`:
 
 ```{r}
 z <- expr(y <- x + 10)
